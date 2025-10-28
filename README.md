@@ -8,7 +8,11 @@ First, install the dependencies of the project by running
 uv sync
 ```
 
-Then, generate the simulation configurations by running `configs/experiment-1/config.csv` with the appropriate parameters.
+Then, generate the simulation configurations by choosing the appropriate parameters in `configs/experiment-1/config.py` and running
+
+```
+python configs/experiment-1/config.py
+```
 
 Finally, run the simulation using the following command
 

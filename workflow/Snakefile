@@ -1,0 +1,37 @@
+import pandas as pd
+
+# load configuration
+# -----------------------------------------------------
+configfile: "workflow/config.yml"
+
+# load parameters
+# -----------------------------------------------------
+df = pd.read_csv(config["config_csv"])
+
+# load rules
+# -----------------------------------------------------
+include: f"rules/{config['rule_file']}.smk"
+
+
+# optional messages, log and error handling
+# -----------------------------------------------------
+onstart:
+    print("\n--- Analysis started ---\n")
+
+
+onsuccess:
+    print("\n--- Workflow finished! ---\n")
+
+
+onerror:
+    print("\n--- An error occurred! ---\n")
+
+
+# target rules
+# -----------------------------------------------------
+rule all:
+    input:
+        expand(
+            "data/{instance_name}/results.json",
+            instance_name=df["instance_name"],
+        )

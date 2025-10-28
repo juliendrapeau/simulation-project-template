@@ -1,0 +1,2 @@
+config_csv: configs/experiment-1/config.csv
+rule_file : main

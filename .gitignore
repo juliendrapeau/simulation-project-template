@@ -1,4 +1,7 @@
 # Folders
+docker_image.tar
+apptainer_image.sif
+.docker_image_id
 .snakemake/
 data/
 

@@ -1,3 +1,5 @@
+containerized: "apptainer_image.sif"
+
 rule generate_numbers:
     input:
         config = f"{config["config_csv"]}",

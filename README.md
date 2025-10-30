@@ -4,7 +4,7 @@ This repository is an example of a reproducible simulation workflow using [Snake
 
 ## Installation
 
-To use this template, the package manager `uv` is strongly recommended. Installation can be done following [uv's documentation](https://docs.astral.sh/uv/getting-started/installation/). It is also recommended to use `docker`, which can be installed following [Docker's documentation](https://docs.docker.com/engine/install/). `snakemake` cannot directly run Docker images, so installing `apptainer` (primarily for testing and cluster use) is recommended. Follow [Apptainer's installation guide](https://apptainer.org/docs/admin/main/installation.html).
+To use this template, the package manager `uv` is strongly recommended. The `pipx` installation is recommended. Installation can be done following [uv's documentation](https://docs.astral.sh/uv/getting-started/installation/). It is also recommended to use `docker`, which can be installed following [Docker's documentation](https://docs.docker.com/engine/install/). `snakemake` cannot directly run Docker images, so installing `apptainer` (primarily for testing and cluster use) is recommended. Follow [Apptainer's installation guide](https://apptainer.org/docs/admin/main/installation.html).
 
 ## Getting started
 
@@ -99,10 +99,10 @@ Generate simulation configurations by editing `configs/experiment-1/config.py` a
 python configs/experiment-1/config.py
 ```
 
-Adjust SLURM parameters in `workflow/profiles/slurm`. Run the simulation with:
+Adjust SLURM parameters in `workflow/profiles/slurm/config.yaml` for the simulations to run. Adjust the SLURM parameters in `run_snakemake.sh` for the snakemake launcher (the runtime of the job should be long enough so that all simulations can finish). Run the simulation with:
 
 ```bash
-snakemake --profile workflow/profiles/slurm/
+sbatch run_snakemake.sh
 ```
 
 Logs can be found in `.snakemake/slurm_logs`.

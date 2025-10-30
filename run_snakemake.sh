@@ -10,8 +10,14 @@
 #SBATCH --mail-user=draj1605@usherbrooke.ca
 #SBATCH --mail-type=ALL
 
+# Load modules
 module load StdEnv/2023 apptainer/1.3 python/3.13
+
+# Install snakemake
+python3 -m venv .venv
 source .venv/bin/activate
+pip install --upgrade pip
+pip install snakemake snakemake-executor-plugin-slurm
 
 snakemake --profile workflow/profiles/slurm/
 

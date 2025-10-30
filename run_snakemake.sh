@@ -7,8 +7,6 @@
 #SBATCH --mem-per-cpu=1G
 #SBATCH --output=slurm-snakemake.out
 #SBATCH --error=slurm-snakemake.err
-#SBATCH --mail-user=draj1605@usherbrooke.ca
-#SBATCH --mail-type=ALL
 
 # Load modules
 module load StdEnv/2023 apptainer/1.3 python/3.13

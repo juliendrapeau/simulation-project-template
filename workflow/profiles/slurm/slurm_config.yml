@@ -1,0 +1,18 @@
+executor: slurm
+latency-wait: 30
+sdm: apptainer
+jobs: 1000
+
+default-resources:
+    slurm_account: "def-ko1"
+    slurm_partition: "c-iq,c-aphex"
+
+    runtime: 30 # in minutes
+    cpus_per_task: 1
+    mem_mb_per_cpu: 1000
+
+set-resources:
+    compute_mean:
+        runtime: 60  # in minutes
+        cpus_per_task: 1
+        mem_mb_per_cpu: 2000

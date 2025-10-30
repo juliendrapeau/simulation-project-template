@@ -19,7 +19,10 @@ def main(config_path, instance_name, output_path) -> int:
     df_tp = df[df["instance_name"] == instance_name]
 
     generate_random_numbers(
-        int(df_tp["sample_size"]), output_path, low=0.0, high=int(df_tp["range_size"])
+        int(df_tp["sample_size"].iloc[0]),
+        output_path,
+        low=0.0,
+        high=int(df_tp["range_size"].iloc[0]),
     )
 
     return 0

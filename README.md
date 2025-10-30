@@ -38,7 +38,7 @@ where `num_cores` is the number of CPU cores to use.
 
 ### Local + Docker/Apptainer
 
-First, install `snakemake` in a local virtual environment:
+First, install `snakemake` in a local virtual environment (skip this step if you already installed `snakemake` with `uv` before):
 
 ```bash
 python3 -m venv .venv
@@ -79,7 +79,7 @@ where `num_cores` is the number of CPU cores to use.
 
 ### SLURM + Docker/Apptainer
 
-First, install `snakemake` in a local virtual environment:
+First, install `snakemake` in a local virtual environment on the SLURM cluster:
 
 ```bash
 python3 -m venv .venv

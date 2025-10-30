@@ -4,21 +4,23 @@ This repository is an example of a reproducible simulation workflow using [Snake
 
 ## Installation
 
-To use this template, the package manager `uv` is strongly recommended. The `pipx` installation is recommended. Installation can be done following [uv's documentation](https://docs.astral.sh/uv/getting-started/installation/). It is also recommended to use `docker`, which can be installed following [Docker's documentation](https://docs.docker.com/engine/install/). `snakemake` cannot directly run Docker images, so installing `apptainer` (primarily for testing and cluster use) is recommended. Follow [Apptainer's installation guide](https://apptainer.org/docs/admin/main/installation.html).
+To use this template, the package manager `uv` is strongly recommended. Installation can be done following [uv's documentation](https://docs.astral.sh/uv/getting-started/installation/). The `pipx` installation is recommended. It is also recommended to use `docker`, which can be installed following [Docker's documentation](https://docs.docker.com/engine/install/). `snakemake` cannot directly run Docker images, so installing `apptainer` (primarily for testing and cluster use) is recommended. Follow [Apptainer's installation guide](https://apptainer.org/docs/admin/main/installation.html).
 
-## Getting started
+## Workflow
 
-The recommended workflow for a simple yet fully reproducible pipeline is as follows. First, build your package and test your simulations locally. To do so, use the package manager `uv` to manage dependencies. When ready, use `snakemake` to manage simulations. For more information, see [Local](#local). Once everything works as expected, build your package as a container using `docker` and `apptainer` to ensure it can run anywhere. See [Local + Docker/Apptainer](#local--dockerapptainer) for details. Finally, run everything on the cluster — a straightforward process once containers are ready. See [SLURM + Docker/Apptainer](#slurm--dockerapptainer) for guidance.
+The recommended workflow for a simple yet fully reproducible pipeline is as follows. First, build your package in `src/snakemake_template/` and test your simulations locally in `tests/`. To do so, use the package manager `uv` to manage dependencies (see [uv's tutorial](https://docs.astral.sh/uv/getting-started/first-steps/)). When ready, use `snakemake` to manage the simulation workflow, as defined in `workflow/` (see [Snakemake's tutorial](https://snakemake.readthedocs.io/en/stable/tutorial/basics.html)). Upon completing the construction of the workflow, see [Local](#local) for the execution of the workflow. Once everything works as expected, build your package as a container using `docker` and `apptainer` to ensure it can run anywhere. See [Local + Docker/Apptainer](#local--dockerapptainer) for details. Finally, run everything on the cluster — a straightforward process once containers are ready. See [SLURM + Docker/Apptainer](#slurm--dockerapptainer) for guidance.
 
----
+## Quickstart
+
+The following sections show an example of how to use a Snakemake workflow once its construction is complete. It uses the scripts of this package as an example.
 
 ### Local
 
-First, install the project dependencies listed in `pyproject.toml`. It is recommended to use `uv`. Install dependencies with:
+Install the project dependencies listed in `pyproject.toml`. It is recommended to use uv. In this case, install dependencies with:
 
 ```bash
 uv sync
-````
+```
 
 Next, generate the simulation configurations by editing the appropriate parameters in `configs/experiment-1/config.py` and running:
 
@@ -26,7 +28,7 @@ Next, generate the simulation configurations by editing the appropriate paramete
 python configs/experiment-1/config.py
 ```
 
-Finally, run the simulation using:
+Run the simulation using:
 
 ```bash
 snakemake -c num_cores
@@ -38,16 +40,7 @@ where `num_cores` is the number of CPU cores to use.
 
 ### Local + Docker/Apptainer
 
-First, install `snakemake` in a local virtual environment (skip this step if you already installed `snakemake` with `uv` before):
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install --upgrade pip
-pip install snakemake
-```
-
-Then, build the Docker image of the project:
+Build the Docker image of the project:
 
 ```bash
 chmod u+x run_docker.sh
@@ -67,7 +60,7 @@ Generate simulation configurations by editing `configs/experiment-1/config.py` a
 python configs/experiment-1/config.py
 ```
 
-Finally, run the simulation using:
+Run the simulation using:
 
 ```bash
 snakemake --sdm apptainer -c num_cores
@@ -78,15 +71,6 @@ where `num_cores` is the number of CPU cores to use.
 ---
 
 ### SLURM + Docker/Apptainer
-
-First, install `snakemake` in a local virtual environment on the SLURM cluster:
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install --upgrade pip
-pip install snakemake snakemake-executor-plugin-slurm
-```
 
 Use the Apptainer image of your project. There are two approaches:
 

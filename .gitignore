@@ -301,3 +301,8 @@ modules.xml
 
 # Sonarlint plugin
 .idea/sonarlint
+
+
+### Configs ###
+
+configs/experiment-1/*.csv

@@ -1,0 +1,18 @@
+# Template for hpc/submit.yaml (gitignored).
+# Copy this file: cp hpc/submit_example.yaml hpc/submit.yaml
+# Then adjust resources for your experiment (time, mem, partition, etc.).
+
+resources:
+  partition: c-main
+  job_name: snakemake
+  time: "04:00:00"
+  account: def-supervisor
+  cpus_per_task: 1
+  mem: 1GB
+  output: slurm-snakemake.out
+  error: slurm-snakemake.err
+  mail_user: your.email@example.com
+  mail_type: ALL
+
+# Extra raw sbatch flags (list of strings). Uncomment to use.
+# extra_sbatch_args: ["--nodes=1"]

@@ -1,0 +1,13 @@
+executor: slurm
+latency-wait: 30
+software-deployment-method: apptainer
+jobs: 500
+keep-going: true
+
+default-resources:
+  slurm_account: "def-supervisor"
+  slurm_partition: "c-main"
+
+  runtime: 30 # minutes per rule job
+  cpus_per_task: 1
+  mem_mb_per_cpu: 2000

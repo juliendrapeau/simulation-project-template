@@ -1,0 +1,3 @@
+snakemake>=9.12.0
+importlib-metadata>=9.0.0
+snakemake-executor-plugin-slurm>=2.6.1

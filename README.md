@@ -1,92 +1,133 @@
-# snakemake-template
+# simulation-project-template
 
-This repository is an example of a reproducible simulation workflow using [Snakemake](https://snakemake.readthedocs.io/en/stable/). For maximum reproducibility, it is recommended to use [Docker](https://www.docker.com/) and [Apptainer](https://apptainer.org/).
+A template for reproducible parameter-sweep simulation projects in Python.
+Combines [uv](https://docs.astral.sh/uv/) for package management,
+[Snakemake](https://snakemake.readthedocs.io/) for workflow orchestration,
+[Docker](https://www.docker.com/) + [Apptainer](https://apptainer.org/) for
+portable execution, and `hpc/lifecycle.py` for one-command SLURM cluster runs.
+
+## Layout
+
+```
+simulation-project-template/
+├── src/                        # installable Python package
+├── tests/                      # pytest suite
+├── workflow/                   # Snakemake pipeline
+│   ├── Snakefile
+│   ├── rules/                  # *.smk rule definitions
+│   ├── scripts/                # per-rule Python jobs
+│   └── tools/                  # shared helpers (sweeper, job metadata)
+├── sweeps/                     # parameter-grid scripts + generated CSVs
+├── configs/                    # static per-run JSON configs (optional)
+├── data/                       # generated outputs  (gitignored)
+├── results/                    # aggregated results (gitignored)
+├── containers/                 # Apptainer SIF images (gitignored)
+├── hpc/                        # cluster lifecycle manager
+├── docs/                       # guides and extension templates
+├── notebooks/                  # exploratory notebooks
+├── figures/                    # publication figures
+├── scratch/                    # temporary scratch files (gitignored)
+├── Dockerfile
+└── workflow.yaml               # active stage, steps, CSV path, num_instances
+```
 
 ## Installation
 
-To use this template, the package manager `uv` is strongly recommended. Installation can be done following [uv's documentation](https://docs.astral.sh/uv/getting-started/installation/). The `pipx` installation is recommended. It is also recommended to use `docker`, which can be installed following [Docker's documentation](https://docs.docker.com/engine/install/). `snakemake` cannot directly run Docker images, so installing `apptainer` (primarily for testing and cluster use) is recommended. Follow [Apptainer's installation guide](https://apptainer.org/docs/admin/main/installation.html).
+Requires Python 3.13+ and [uv](https://docs.astral.sh/uv/getting-started/installation/).
 
-## Workflow
+```bash
+git clone <your-repo>
+cd <your-repo>
+uv sync --dev
+```
 
-The recommended workflow for a simple yet fully reproducible pipeline is as follows. First, build your package in `src/snakemake_template/` and test your simulations locally in `tests/`. To do so, use the package manager `uv` to manage dependencies (see [uv's tutorial](https://docs.astral.sh/uv/getting-started/first-steps/)). When ready, use `snakemake` to manage the simulation workflow, as defined in `workflow/` (see [Snakemake's tutorial](https://snakemake.readthedocs.io/en/stable/tutorial/basics.html)). Upon completing the construction of the workflow, see [Local](#local) for the execution of the workflow. Once everything works as expected, build your package as a container using `docker` and `apptainer` to ensure it can run anywhere. See [Local + Docker/Apptainer](#local--dockerapptainer) for details. Finally, run everything on the cluster — a straightforward process once containers are ready. See [SLURM + Docker/Apptainer](#slurm--dockerapptainer) for guidance.
+### Optional tools
+
+| Tool | Purpose |
+|---|---|
+| [Docker](https://docs.docker.com/engine/install/) | Build portable container images |
+| [Apptainer](https://apptainer.org/docs/admin/main/installation.html) | Run containers on HPC |
 
 ## Quickstart
 
-The following sections show an example of how to use a Snakemake workflow once its construction is complete. It uses the scripts of this package as an example.
-
-### Local
-
-Install the project dependencies listed in `pyproject.toml`. It is recommended to use uv. In this case, install dependencies with:
-
 ```bash
-uv sync
+uv sync --dev                            # install package + dev dependencies
+python sweeps/simulation/e0/sweep.py    # materialise the parameter-grid CSV
+uv run snakemake --cores 4
 ```
 
-Next, generate the simulation configurations by editing the appropriate parameters in `configs/experiment-1/config.py` and running:
+That runs the full `simulate → aggregate` pipeline across every parameter
+combination × `num_instances` replications, producing `results/simulation/e0/results.csv`.
+
+### Running inside a container
+
+Build the Apptainer image, then enable it in `workflow.yaml`:
 
 ```bash
-python configs/experiment-1/config.py
+uv run hpc/containers/build_sif.py --platforms linux/amd64
 ```
 
-Run the simulation using:
+```yaml
+# workflow.yaml
+container: containers/simulation-project-template-0.1.0.sif
+```
 
 ```bash
-snakemake -c num_cores
+uv run python -m snakemake --snakefile workflow/Snakefile --cores 4 --use-singularity
 ```
 
-where `num_cores` is the number of CPU cores to use.
-
----
-
-### Local + Docker/Apptainer
-
-Build the Docker image of the project:
+### Running on a SLURM cluster
 
 ```bash
-chmod u+x run_docker.sh
-./run_docker.sh
+# 1. Copy config templates and fill in your cluster details.
+cp hpc/config_example.yaml  hpc/config.yaml
+cp hpc/submit_example.yaml  hpc/submit.yaml
+
+# 2. Build the SIF image and upload the project.
+uv run hpc/containers/build_sif.py
+python hpc/lifecycle.py upload mycluster myproject/workflow
+
+# 3. One-time venv bootstrap on the cluster.
+python hpc/lifecycle.py setup mycluster myproject/workflow
+
+# 4. Submit and monitor.
+python hpc/lifecycle.py submit mycluster myproject/workflow
+python hpc/lifecycle.py status mycluster
+python hpc/lifecycle.py check  mycluster myproject/workflow
+
+# 5. Pull results back.
+python hpc/lifecycle.py download mycluster myproject/workflow --paths results
 ```
 
-Convert the Docker image to an Apptainer image:
+See [`docs/hpc-workflow.md`](docs/hpc-workflow.md) for the full HPC guide.
+
+## CLI
+
+The package exposes a `spt` command:
 
 ```bash
-docker save -o docker_image.tar $(cat .docker_image_id)
-apptainer build apptainer_image.sif docker-archive://docker_image.tar
+spt generate 100 -o numbers.json --seed 42   # generate random numbers
+spt mean numbers.json                         # compute mean
 ```
 
-Generate simulation configurations by editing `configs/experiment-1/config.py` and running:
+## Tests
 
 ```bash
-python configs/experiment-1/config.py
+uv run python -m pytest tests/
 ```
 
-Run the simulation using:
+## Adapting this template
 
-```bash
-snakemake --sdm apptainer -c num_cores
-```
+1. **Rename the package.** Change `simulation-project-template` / `simulation_project_template` everywhere (pyproject.toml, src/, Dockerfile, workflow/tools/job_utils.py).
+2. **Replace the simulation logic.** Rewrite `src/simulation_project_template/` with your model; update `workflow/scripts/simulate.py` to call it.
+3. **Define your parameter grid.** Edit `sweeps/simulation/e0/sweep.py`; add new experiments by copying to `sweeps/simulation/e1/sweep.py`, etc.
+4. **Add steps or stages.** Follow the templates in [`docs/templates/`](docs/templates/).
 
-where `num_cores` is the number of CPU cores to use.
+## Documentation
 
----
-
-### SLURM + Docker/Apptainer
-
-Use the Apptainer image of your project. There are two approaches:
-
-1. Locally build the Docker image, convert it to Apptainer, and upload it to the cluster (recommended).
-2. Build and upload the Docker image to Docker Hub, download it on the cluster, and convert it to Apptainer.
-
-Generate simulation configurations by editing `configs/experiment-1/config.py` and running:
-
-```bash
-python configs/experiment-1/config.py
-```
-
-Adjust SLURM parameters in `workflow/profiles/slurm/config.yaml` for the simulations to run. Adjust the SLURM parameters in `run_snakemake.sh` for the snakemake launcher (the runtime of the job should be long enough so that all simulations can finish). Run the simulation with:
-
-```bash
-sbatch run_snakemake.sh
-```
-
-Logs can be found in `.snakemake/slurm_logs`.
+| Guide | Contents |
+|---|---|
+| [`docs/snakemake-workflow.md`](docs/snakemake-workflow.md) | Pipeline layout, stages, steps, parameter grid, launching |
+| [`docs/hpc-workflow.md`](docs/hpc-workflow.md) | Cluster upload, setup, submit, download |
+| [`docs/cli-workflow.md`](docs/cli-workflow.md) | CLI usage and extension |
+| [`docs/templates/`](docs/templates/) | Skeletons for new stages and steps |

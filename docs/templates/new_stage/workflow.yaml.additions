@@ -1,0 +1,17 @@
+# Edits to apply in workflow.yaml when adding a stage called "bar".
+
+# 1. Switch the active stage and list its steps.
+# active:
+#   stage: bar
+#   steps: [bar, aggregate]
+#
+# stages:
+#   simulation:                          # keep existing stages
+#     exp: e0
+#     csv: sweeps/simulation/e0/summary.csv
+#   bar:                                 # new stage
+#     exp: e0
+#     csv: sweeps/bar/e0/summary.csv
+
+# 2. (Optional) stage-specific top-level params read via config.get(...)
+# my_stage_param: 2

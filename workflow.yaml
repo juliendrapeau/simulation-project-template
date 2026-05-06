@@ -1,0 +1,16 @@
+active:
+  stage: simulation
+  # Available steps: [simulate], [simulate, aggregate]
+  steps: [simulate, aggregate]
+
+stages:
+  simulation:
+    exp: e0
+    csv: sweeps/simulation/e0/summary.csv
+
+# Optional: Apptainer container for per-job execution.
+# Requires --use-singularity on the CLI to take effect.
+# container: containers/simulation-project-template-0.1.0.sif
+
+# Number of replications per parameter point ({instance} wildcard: 1..num_instances).
+num_instances: 3

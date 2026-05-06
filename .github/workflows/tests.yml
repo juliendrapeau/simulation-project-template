@@ -1,0 +1,67 @@
+name: Tests
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  run-tests-on-ubuntu:
+    name: Run tests on Ubuntu-latest
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.13"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "0.9.2"
+          enable-cache: true
+
+      - name: Install dependencies
+        run: |
+          uv sync --locked --dev
+
+      - name: Lint with Ruff
+        run: |
+          uv run ruff check src tests --diff
+
+      - name: Type check with mypy
+        run: |
+          uv run mypy src tests
+
+      - name: Run unit tests with pytest
+        env:
+          SKIP_GPU: "1"
+          CUDA_VISIBLE_DEVICES: ""
+        run: |
+          mkdir -p tests/.tmp
+          uv run pytest tests \
+            --cov=src \
+            --cov-config=.coveragerc-ci \
+            --cov-report=xml:tests/.tmp/coverage.xml \
+            --cov-report=term-missing \
+            --durations=10 \
+            --session-timeout=600
+
+      - name: Code coverage check
+        uses: orgoro/coverage@v3.2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          coverageFile: tests/.tmp/coverage.xml
+          thresholdAll: 0.90
+          thresholdNew: 0.90
+          thresholdModified: 0.90

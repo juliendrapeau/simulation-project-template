@@ -1,0 +1,9 @@
+# Edits to apply in workflow.yaml when adding a step called "foo".
+
+# 1. Add "foo" to active.steps (after the step it depends on).
+# active:
+#   stage: simulation
+#   steps: [simulate, foo, aggregate]
+
+# 2. (Optional) top-level params the rule reads via config.get(...)
+# my_param: 42

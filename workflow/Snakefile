@@ -1,20 +1,38 @@
 import pandas as pd
+from pathlib import Path
 
-# load configuration
-# -----------------------------------------------------
-configfile: "workflow/config.yml"
+configfile: "workflow.yaml"
 
-# load parameters
-# -----------------------------------------------------
-df = pd.read_csv(config["config_csv"])
+ACTIVE_STAGE = config["active"]["stage"]
+ACTIVE_STEPS = config["active"]["steps"]
 
-# load rules
-# -----------------------------------------------------
-include: f"rules/{config['rule_file']}.smk"
+if config.get("container"):
+    container: config["container"]
+
+SUBCFG = config["stages"][ACTIVE_STAGE]
+EXP    = SUBCFG["exp"]
+CSV    = SUBCFG["csv"]
+
+if not Path(CSV).exists():
+    raise WorkflowError(
+        f"Summary CSV not found: {CSV}\n"
+        f"Generate it first by running the corresponding sweep script, e.g.:\n"
+        f"  python sweeps/simulation/e0/sweep.py"
+    )
+
+_df = pd.read_csv(CSV)
+
+params_by_path = {
+    row["short_path"]: row.to_dict()
+    for _, row in _df.iterrows()
+}
+
+instances = list(range(1, config["num_instances"] + 1))
+
+include: "rules/simulate.smk"
+include: "rules/aggregate.smk"
 
 
-# optional messages, log and error handling
-# -----------------------------------------------------
 onstart:
     print("\n--- Analysis started ---\n")
 
@@ -27,11 +45,19 @@ onerror:
     print("\n--- An error occurred! ---\n")
 
 
-# target rules
-# -----------------------------------------------------
+def _all_targets():
+    targets = []
+    if "simulate" in ACTIVE_STEPS:
+        targets += expand(
+            f"data/{ACTIVE_STAGE}/{EXP}/{{path}}/{{instance}}/results.json",
+            path=_df["short_path"],
+            instance=instances,
+        )
+    if "aggregate" in ACTIVE_STEPS:
+        targets += [f"results/{ACTIVE_STAGE}/{EXP}/results.csv"]
+    return targets
+
+
 rule all:
     input:
-        expand(
-            "data/{instance_name}/results.json",
-            instance_name=df["instance_name"],
-        )
+        _all_targets()

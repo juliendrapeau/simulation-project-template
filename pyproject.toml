@@ -1,16 +1,14 @@
 [project]
-name = "snakemake-template"
+name = "simulation-project-template"
+description = "A template for reproducible simulation projects in Python."
 version = "0.1.0"
-description = "Add your description here"
+authors = [{ name = "Julien Drapeau", email = "juliendrapeau707@gmail.com" }]
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = [
-    "numpy>=2.3.4",
-    "pandas>=2.3.3",
-]
+dependencies = ["numpy>=2.3.4", "pandas>=2.3.3"]
 
 [project.scripts]
-snakemake-template = "snakemake_template:main"
+spt = "simulation_project_template.cli:main"
 
 [build-system]
 requires = ["uv_build>=0.9.0,<0.10.0"]
@@ -18,5 +16,22 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
-    "snakemake>=9.13.4",
+  "importlib-metadata>=9.0.0",
+  "matplotlib>=3.10.8",
+  "mypy>=1.19.1",
+  "pytest>=9.0.2",
+  "pytest-cov>=7.0.0",
+  "pytest-timeout>=2.4.0",
+  "pytest-xdist>=3.8.0",
+  "pyyaml>=6.0",
+  "ruff>=0.15.5",
+  "seaborn>=0.13.2",
+  "snakemake>=9.13.4",
+  "tqdm>=4.0",
 ]
+
+[tool.mypy]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+addopts = "--cov=src --cov-report=term-missing --cov-report=html"

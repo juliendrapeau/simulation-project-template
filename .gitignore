@@ -1,10 +1,3 @@
-# Folders
-docker_image.tar
-apptainer_image.sif
-.docker_image_id
-.snakemake/
-data/
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
@@ -302,7 +295,24 @@ modules.xml
 # Sonarlint plugin
 .idea/sonarlint
 
+# Claude
+.claude/
 
-### Configs ###
+# Project-specific
+hpc/config.yaml
+hpc/submit.yaml
 
-configs/experiment-1/*.csv
+# Generated data and results (large, reproducible from workflow)
+data/
+results/
+scratch/
+
+# Container images
+containers/*.sif
+containers/*.tar.gz
+*.sif
+docker_image.tar
+.docker_image_id
+
+# Snakemake
+.snakemake/

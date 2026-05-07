@@ -2,7 +2,7 @@ name: Build dist
 
 on:
   push:
-    tags: ["v*"]
+    tags: ["v[0-9]+.0.0"] # major releases only (PRs merged to main)
 
 permissions:
   contents: write

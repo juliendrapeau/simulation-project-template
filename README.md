@@ -6,6 +6,16 @@ Combines [uv](https://docs.astral.sh/uv/) for package management,
 [Docker](https://www.docker.com/) + [Apptainer](https://apptainer.org/) for
 portable execution, and `hpc/lifecycle.py` for one-command SLURM cluster runs.
 
+> [!WARNING]
+> **HPC users — be a responsible cluster citizen.**
+> Submitting large parameter sweeps without testing first can flood the scheduler with hundreds or thousands of jobs, waste allocation hours on misconfigured runs, and get your account flagged or suspended by the cluster administrators.
+> Before submitting at scale, always:
+>
+> 1. Validate locally with a small config or `snakemake --dryrun`.
+> 2. Submit a single test job (`--test` flag) and confirm it completes correctly.
+> 3. Check current queue pressure with `python hpc/lifecycle.py status <cluster>` before submitting.
+> 4. Prefer the `profile` mode so Snakemake caps concurrency via `slurm_profile.yaml` rather than flooding the queue all at once.
+
 ## Layout
 
 ```

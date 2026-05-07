@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import subprocess
+import sys
 from pathlib import Path
 
 import importlib_metadata
@@ -24,6 +25,23 @@ PLATFORM_ARCH: dict[str, str] = {
     "linux/arm64": "arm64",
 }
 APPTAINER_IMAGE = "kaczmarj/apptainer:latest"
+
+
+def _check_clean_src() -> None:
+    root = Path(__file__).resolve().parent.parent.parent
+    result = subprocess.run(
+        ["git", "status", "--porcelain", "src/"],
+        capture_output=True,
+        text=True,
+        cwd=root,
+    )
+    if result.stdout.strip():
+        print(
+            "error: uncommitted changes in src/ would be baked into the image.\n"
+            "Commit or stash them before building the SIF.\n\n" + result.stdout,
+            file=sys.stderr,
+        )
+        raise SystemExit(1)
 
 
 def _project_root() -> Path:
@@ -108,7 +126,14 @@ def main() -> int:
         default="",
         help="Image/Dockerfile suffix (e.g. 'gpu' uses Dockerfile-gpu and tags as <version>-gpu).",
     )
+    parser.add_argument(
+        "--dirty",
+        action="store_true",
+        help="Allow building with uncommitted changes in src/. For testing only.",
+    )
     args = parser.parse_args()
+    if not args.dirty:
+        _check_clean_src()
     suffix = args.suffix.strip("-")
     dockerfile = _project_root() / (f"Dockerfile-{suffix}" if suffix else "Dockerfile")
 

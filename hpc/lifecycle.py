@@ -113,7 +113,10 @@ def _git_commit(project_root: Path) -> str:
     try:
         result = subprocess.run(
             ["git", "rev-parse", "HEAD"],
-            capture_output=True, text=True, check=True, cwd=project_root,
+            capture_output=True,
+            text=True,
+            check=True,
+            cwd=project_root,
         )
         return result.stdout.strip()
     except subprocess.CalledProcessError:
@@ -165,7 +168,9 @@ def _add_upload_parser(sub: argparse._SubParsersAction) -> None:
     p = sub.add_parser("upload", help="Upload required workflow files to the cluster.")
     p.add_argument("cluster", help="SSH host alias.")
     p.add_argument("remote_folder", help="Destination folder under the cluster root.")
-    p.add_argument("--project-root", default=str(Path(__file__).resolve().parent.parent))
+    p.add_argument(
+        "--project-root", default=str(Path(__file__).resolve().parent.parent)
+    )
     p.add_argument("--remote-root", default=None)
     p.add_argument("--dry-run", action="store_true")
     p.add_argument("--no-build-sif", action="store_true", help="Skip SIF image build.")
@@ -180,7 +185,13 @@ def cmd_upload(args: argparse.Namespace) -> int:
         raise FileNotFoundError(f"Project root not found: {project_root}")
 
     if not args.no_build_sif:
-        sif_cmd = ["uv", "run", "hpc/containers/build_sif.py", "--platforms", args.sif_platform]
+        sif_cmd = [
+            "uv",
+            "run",
+            "hpc/containers/build_sif.py",
+            "--platforms",
+            args.sif_platform,
+        ]
         if args.sif_suffix:
             sif_cmd.extend(["--suffix", args.sif_suffix])
         print(f"[INFO] Building SIF: {' '.join(sif_cmd)}")
@@ -190,7 +201,7 @@ def cmd_upload(args: argparse.Namespace) -> int:
     remote_target = root / args.remote_folder
 
     if not _confirm_existing_upload_target(args.cluster, remote_target):
-        print(f"[INFO] Upload cancelled.")
+        print("[INFO] Upload cancelled.")
         return 0
 
     paths = collect_upload_paths(project_root)
@@ -220,18 +231,29 @@ def cmd_upload(args: argparse.Namespace) -> int:
 
 
 def _add_submit_parser(sub: argparse._SubParsersAction) -> None:
-    p = sub.add_parser("submit", help="SSH to the cluster and submit a Snakemake SLURM job.")
+    p = sub.add_parser(
+        "submit", help="SSH to the cluster and submit a Snakemake SLURM job."
+    )
     p.add_argument("cluster", help="SSH host alias.")
-    p.add_argument("remote_folder", help="Remote project folder under the cluster root.")
     p.add_argument(
-        "--mode", choices=["profile", "local"], default="profile",
+        "remote_folder", help="Remote project folder under the cluster root."
+    )
+    p.add_argument(
+        "--mode",
+        choices=["profile", "local"],
+        default="profile",
         help="'profile' dispatches jobs via hpc/config.yaml; 'local' runs with -c $SLURM_CPUS_PER_TASK.",
     )
-    p.add_argument("--project-root", default=str(Path(__file__).resolve().parent.parent))
+    p.add_argument(
+        "--project-root", default=str(Path(__file__).resolve().parent.parent)
+    )
     p.add_argument("--remote-root", default=None)
     p.add_argument("--dry-run", action="store_true")
-    p.add_argument("--snakemake-dry-run", action="store_true",
-                   help="Pass --dryrun to Snakemake: plan only, no jobs executed.")
+    p.add_argument(
+        "--snakemake-dry-run",
+        action="store_true",
+        help="Pass --dryrun to Snakemake: plan only, no jobs executed.",
+    )
     p.set_defaults(func=cmd_submit)
 
 
@@ -284,13 +306,24 @@ def cmd_submit(args: argparse.Namespace) -> int:
 def _add_download_parser(sub: argparse._SubParsersAction) -> None:
     p = sub.add_parser("download", help="Download workflow outputs from the cluster.")
     p.add_argument("cluster", help="SSH host alias.")
-    p.add_argument("remote_folder", help="Remote project folder under the cluster root.")
-    p.add_argument("--project-root", default=str(Path(__file__).resolve().parent.parent))
+    p.add_argument(
+        "remote_folder", help="Remote project folder under the cluster root."
+    )
+    p.add_argument(
+        "--project-root", default=str(Path(__file__).resolve().parent.parent)
+    )
     p.add_argument("--remote-root", default=None)
-    p.add_argument("--paths", nargs="+", default=["results"],
-                   help="Relative paths to download (default: results).")
-    p.add_argument("--include-data", action="store_true",
-                   help="Also download data/ in addition to --paths.")
+    p.add_argument(
+        "--paths",
+        nargs="+",
+        default=["results"],
+        help="Relative paths to download (default: results).",
+    )
+    p.add_argument(
+        "--include-data",
+        action="store_true",
+        help="Also download data/ in addition to --paths.",
+    )
     p.add_argument("--dry-run", action="store_true")
     p.set_defaults(func=cmd_download)
 
@@ -330,7 +363,9 @@ def cmd_download(args: argparse.Namespace) -> int:
     return 0
 
 
-def _write_manifest(project_root: Path, args: argparse.Namespace, root: Path, paths: list[str]) -> None:
+def _write_manifest(
+    project_root: Path, args: argparse.Namespace, root: Path, paths: list[str]
+) -> None:
     manifest = {
         "timestamp": datetime.now(tz=timezone.utc).isoformat(),
         "cluster": args.cluster,
@@ -352,14 +387,21 @@ def _write_manifest(project_root: Path, args: argparse.Namespace, root: Path, pa
 
 
 def _add_setup_parser(sub: argparse._SubParsersAction) -> None:
-    p = sub.add_parser("setup", help="Run the cluster setup script (creates venv + installs deps).")
+    p = sub.add_parser(
+        "setup", help="Run the cluster setup script (creates venv + installs deps)."
+    )
     p.add_argument("cluster", help="SSH host alias.")
-    p.add_argument("remote_folder", help="Remote project folder under the cluster root.")
+    p.add_argument(
+        "remote_folder", help="Remote project folder under the cluster root."
+    )
     p.add_argument("--remote-root", default=None)
     p.add_argument("--script", default="hpc/setup/setup.sh")
     p.add_argument("--dry-run", action="store_true")
-    p.add_argument("--salloc", action="store_true",
-                   help="Run setup inside an interactive SLURM allocation.")
+    p.add_argument(
+        "--salloc",
+        action="store_true",
+        help="Run setup inside an interactive SLURM allocation.",
+    )
     p.add_argument("--salloc-args", default="")
     p.set_defaults(func=cmd_setup)
 
@@ -389,7 +431,9 @@ def cmd_setup(args: argparse.Namespace) -> int:
 
     run_cmd(["ssh", args.cluster, remote_cmd])
     print("[DONE] Environment ready.")
-    print("       Submit jobs with: python hpc/lifecycle.py submit <cluster> <remote_folder>")
+    print(
+        "       Submit jobs with: python hpc/lifecycle.py submit <cluster> <remote_folder>"
+    )
     return 0
 
 
@@ -401,7 +445,9 @@ def cmd_setup(args: argparse.Namespace) -> int:
 def _add_check_parser(sub: argparse._SubParsersAction) -> None:
     p = sub.add_parser("check", help="SSH to the cluster and run snakemake --summary.")
     p.add_argument("cluster", help="SSH host alias.")
-    p.add_argument("remote_folder", help="Remote project folder under the cluster root.")
+    p.add_argument(
+        "remote_folder", help="Remote project folder under the cluster root."
+    )
     p.add_argument("--remote-root", default=None)
     p.set_defaults(func=cmd_check)
 
@@ -442,7 +488,7 @@ def cmd_check(args: argparse.Namespace) -> int:
         if exec_state == "missing":
             status = "missing"
         elif exec_state == "ok":
-            status = update_state
+            status = "up to date" if "no update" in update_state else "pending"
         else:
             status = exec_state
         counts[status] = counts.get(status, 0) + 1
@@ -468,15 +514,20 @@ def _add_status_parser(sub: argparse._SubParsersAction) -> None:
     p = sub.add_parser("status", help="Show running SLURM jobs on the cluster.")
     p.add_argument("cluster", help="SSH host alias.")
     p.add_argument("--user", default=None)
-    p.add_argument("--full", action="store_true",
-                   help="Show completed job history via sacct instead of squeue.")
+    p.add_argument(
+        "--full",
+        action="store_true",
+        help="Show completed job history via sacct instead of squeue.",
+    )
     p.set_defaults(func=cmd_status)
 
 
 def cmd_status(args: argparse.Namespace) -> int:
     user = args.user or "${USER:-$(whoami)}"
     if args.full:
-        remote_cmd = f"sacct -u {user} --format=JobID,JobName,State,Elapsed,NodeList,ExitCode -X"
+        remote_cmd = (
+            f"sacct -u {user} --format=JobID,JobName,State,Elapsed,NodeList,ExitCode -X"
+        )
     else:
         remote_cmd = f"squeue -u {user}"
     run_cmd(["ssh", args.cluster, remote_cmd])

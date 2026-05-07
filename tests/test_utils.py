@@ -36,3 +36,13 @@ def test_generate_random_numbers_reproducible(tmp_path):
     with open(p2) as f:
         d2 = json.load(f)
     assert d1["number_set"] == d2["number_set"]
+
+
+def test_generate_random_numbers_invalid_count(tmp_path):
+    with pytest.raises(ValueError, match="positive integer"):
+        generate_random_numbers(0, str(tmp_path / "out.json"))
+
+
+def test_generate_random_numbers_invalid_bounds(tmp_path):
+    with pytest.raises(ValueError, match="low must be less than high"):
+        generate_random_numbers(5, str(tmp_path / "out.json"), low=1.0, high=0.0)

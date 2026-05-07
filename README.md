@@ -49,8 +49,8 @@ simulation-project-template/
 Requires Python 3.13+ and [uv](https://docs.astral.sh/uv/getting-started/installation/).
 
 ```bash
-git clone <your-repo>
-cd <your-repo>
+git clone git@github.com:juliendrapeau/snakemake-template.git
+cd snakemake-template
 uv sync --dev
 ```
 
@@ -63,22 +63,29 @@ uv sync --dev
 
 ## Quickstart
 
+The typical workflow goes: run locally → containerize → submit to HPC.
+
+### 1. Local run
+
+First, validate the pipeline locally. Generate the parameter grid from your sweep script, then let Snakemake fan out the jobs:
+
 ```bash
-uv sync --dev                            # install package + dev dependencies
-python sweeps/simulation/e0/sweep.py    # materialise the parameter-grid CSV
-uv run snakemake --cores 4
+python sweeps/simulation/e0/sweep.py   # generate the parameter-grid CSV
+uv run python -m snakemake --cores 4   # run simulate → aggregate
 ```
 
-That runs the full `simulate → aggregate` pipeline across every parameter
-combination × `num_instances` replications, producing `results/simulation/e0/results.csv`.
+Results land in `results/simulation/e0/results.csv`.
+See [`docs/snakemake-workflow.md`](docs/snakemake-workflow.md) for a full guide on stages, steps, and parameter grids.
 
-### Running inside a container
+### 2. Build the container
 
-Build the Apptainer image, then enable it in `workflow.yaml`:
+Package the environment into an [Apptainer](https://apptainer.org/) SIF image to pin dependencies and make runs portable. This step is required before submitting to HPC, and is good practice for local reproducibility too:
 
 ```bash
 uv run hpc/containers/build_sif.py --platforms linux/amd64
 ```
+
+Point `workflow.yaml` at the generated image and re-run with `--use-singularity` to confirm everything works inside the container:
 
 ```yaml
 # workflow.yaml
@@ -86,33 +93,34 @@ container: containers/simulation-project-template-0.1.0.sif
 ```
 
 ```bash
-uv run python -m snakemake --snakefile workflow/Snakefile --cores 4 --use-singularity
+uv run python -m snakemake --cores 4 --use-singularity
 ```
 
-### Running on a SLURM cluster
+### 3. Run on a SLURM cluster
+
+`hpc/lifecycle.py` manages the full HPC lifecycle from your local machine — it uploads the project, bootstraps a venv on the cluster, submits the Snakemake job via SLURM, and pulls results back.
+See [`docs/hpc-workflow.md`](docs/hpc-workflow.md) for the full guide.
 
 ```bash
-# 1. Copy config templates and fill in your cluster details.
-cp hpc/config_example.yaml  hpc/config.yaml
-cp hpc/submit_example.yaml  hpc/submit.yaml
+# 1. Configure your cluster and submission settings.
+cp hpc/config_example.yaml hpc/config.yaml
+cp hpc/submit_example.yaml hpc/submit.yaml
 
-# 2. Build the SIF image and upload the project.
+# 2. Build the SIF image (if not done already) and upload the project.
 uv run hpc/containers/build_sif.py
-python hpc/lifecycle.py upload mycluster myproject/workflow
+python hpc/lifecycle.py upload mycluster myproject
 
 # 3. One-time venv bootstrap on the cluster.
-python hpc/lifecycle.py setup mycluster myproject/workflow
+python hpc/lifecycle.py setup mycluster myproject
 
-# 4. Submit and monitor.
-python hpc/lifecycle.py submit mycluster myproject/workflow
+# 4. Submit, then monitor progress.
+python hpc/lifecycle.py submit mycluster myproject
 python hpc/lifecycle.py status mycluster
-python hpc/lifecycle.py check  mycluster myproject/workflow
+python hpc/lifecycle.py check  mycluster myproject
 
-# 5. Pull results back.
-python hpc/lifecycle.py download mycluster myproject/workflow --paths results
+# 5. Pull results back when done.
+python hpc/lifecycle.py download mycluster myproject --paths results
 ```
-
-See [`docs/hpc-workflow.md`](docs/hpc-workflow.md) for the full HPC guide.
 
 ## CLI
 

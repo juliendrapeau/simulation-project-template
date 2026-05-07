@@ -1,12 +1,12 @@
 active:
   stage: simulation
-  # Available steps: [simulate], [simulate, aggregate]
   steps: [simulate, aggregate]
 
 stages:
   simulation:
     exp: e0
     csv: sweeps/simulation/e0/summary.csv
+    steps: [simulate, aggregate]
 
 # Optional: Apptainer container for per-job execution.
 # Requires --use-singularity on the CLI to take effect.

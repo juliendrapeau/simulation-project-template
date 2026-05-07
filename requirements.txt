@@ -192,6 +192,7 @@ traitlets==5.14.3
     # via
     #   jupyter-core
     #   nbformat
+types-pyyaml==6.0.12.20260408
 typing-extensions==4.15.0
     # via mypy
 tzdata==2025.2

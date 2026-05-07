@@ -16,6 +16,9 @@ portable execution, and `hpc/lifecycle.py` for one-command SLURM cluster runs.
 > 3. Check current queue pressure with `python hpc/lifecycle.py status <cluster>` before submitting.
 > 4. Prefer the `profile` mode so Snakemake caps concurrency via `slurm_profile.yaml` rather than flooding the queue all at once.
 
+> [!NOTE]
+> This template may lag behind my latest developments and is not guaranteed to work perfectly. Feel free to open an issue or discussion if you run into problems.
+
 ## Layout
 
 ```
@@ -126,9 +129,26 @@ spt mean numbers.json                         # compute mean
 uv run python -m pytest tests/
 ```
 
+## Releases
+
+The package uses semantic versioning — major for PRs into `main`, minor for PRs into
+`dev`, patch for hotfixes. To cut a release, bump `pyproject.toml`, commit,
+and push a `vX.Y.Z` tag. CI builds the sdist + wheel and creates a GitHub
+Release automatically.
+
+Every simulation should run inside a SIF built from the tagged commit so
+results stay traceable:
+
+```bash
+uv run hpc/containers/build_sif.py          # → containers/sgcode-X.Y.Z.sif
+# set container: containers/sgcode-X.Y.Z.sif in workflow.yml
+```
+
+See [`docs/versioning.md`](docs/versioning.md) for the full procedure.
+
 ## Adapting this template
 
-1. **Rename the package.** Change `simulation-project-template` / `simulation_project_template` everywhere (pyproject.toml, src/, Dockerfile, workflow/tools/job_utils.py).
+1. **Rename the package.** Change `simulation-project-template` / `simulation_project_template` everywhere (pyproject.toml, license, src/, Dockerfile, workflow/tools/job_utils.py, etc.).
 2. **Replace the simulation logic.** Rewrite `src/simulation_project_template/` with your model; update `workflow/scripts/simulate.py` to call it.
 3. **Define your parameter grid.** Edit `sweeps/simulation/e0/sweep.py`; add new experiments by copying to `sweeps/simulation/e1/sweep.py`, etc.
 4. **Add steps or stages.** Follow the templates in [`docs/templates/`](docs/templates/).

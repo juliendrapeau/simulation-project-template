@@ -24,7 +24,7 @@ def _cmd_generate(args: argparse.Namespace) -> int:
 def _cmd_mean(args: argparse.Namespace) -> int:
     with open(args.input) as f:
         data = json.load(f)
-    numbers = data.get("number_set", data)
+    numbers = data if isinstance(data, list) else data.get("number_set", data)
     if not isinstance(numbers, list):
         print("Error: expected a list under 'number_set' key.", file=sys.stderr)
         return 1

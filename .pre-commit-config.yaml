@@ -33,8 +33,10 @@ repos:
       # Run the formatter.
       - id: ruff-format
 
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.20.2
+  - repo: local
     hooks:
-      - id: mypy
-        additional_dependencies: ["types-pyyaml"]
+      - id: ty
+        name: ty
+        entry: uv run ty check src/ tests/ workflow/ hpc/
+        language: system
+        pass_filenames: false

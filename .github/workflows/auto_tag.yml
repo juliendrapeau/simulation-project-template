@@ -1,0 +1,42 @@
+name: Auto tag on merge
+
+on:
+  push:
+    branches: [main, dev]
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    name: Tag merged version
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Read version from pyproject.toml
+        id: version
+        run: |
+          VERSION=$(python3 -c "
+          import tomllib; from pathlib import Path
+          d = tomllib.loads(Path('pyproject.toml').read_text())
+          print(d['project']['version'])
+          ")
+          echo "value=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Create and push tag
+        run: |
+          TAG="v${{ steps.version.outputs.value }}"
+          if git ls-remote --tags origin | grep -q "refs/tags/${TAG}$"; then
+            echo "Tag ${TAG} already exists — skipping (non-version commit merged)."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "$TAG"
+          git push origin "$TAG"
+          echo "Created and pushed tag ${TAG}."

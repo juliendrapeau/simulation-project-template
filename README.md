@@ -49,7 +49,7 @@ simulation-project-template/
 Requires Python 3.13+ and [uv](https://docs.astral.sh/uv/getting-started/installation/).
 
 ```bash
-git clone git@github.com:juliendrapeau/snakemake-template.git
+git clone git@github.com:juliendrapeau/simulation-project-template.git
 cd snakemake-template
 uv sync --dev
 ```
@@ -148,8 +148,8 @@ Every simulation should run inside a SIF built from the tagged commit so
 results stay traceable:
 
 ```bash
-uv run hpc/containers/build_sif.py          # → containers/sgcode-X.Y.Z.sif
-# set container: containers/sgcode-X.Y.Z.sif in workflow.yml
+uv run hpc/containers/build_sif.py   # → containers/simulation-project-template-X.Y.Z.sif
+# set container: containers/simulation-project-template-X.Y.Z.sif in workflow.yml
 ```
 
 See [`docs/versioning.md`](docs/versioning.md) for the full procedure.

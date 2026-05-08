@@ -78,7 +78,7 @@ git fetch --tags
 
 # 2. Build the SIF from the clean tagged tree
 uv run hpc/containers/build_sif.py --platforms linux/amd64
-# → containers/spt-0.2.0.sif
+# → containers/simulation-project-template-0.2.0.sif
 
 # 3. Upload
 python hpc/lifecycle.py upload <host> <remote_path>
@@ -88,7 +88,7 @@ Set `container` in `workflow.yaml` to lock the pipeline to that image:
 
 ```yaml
 # workflow.yaml
-container: containers/spt-0.2.0.sif
+container: containers/simulation-project-template-0.2.0.sif
 ```
 
 Snakemake passes this to `--use-singularity`, so every job runs inside the
@@ -111,7 +111,7 @@ patch in the base image), but that has no effect on simulation results.
 git checkout v0.1.0
 
 # Or install that version from PyPI / GitHub Releases
-uv add 'spt==0.1.0'
+uv add 'simulation-project-template==0.1.0'
 ```
 
 If the original SIF is still available, use it directly in `workflow.yaml` so

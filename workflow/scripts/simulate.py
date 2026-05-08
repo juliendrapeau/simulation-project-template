@@ -11,11 +11,11 @@ import json
 import logging
 import os
 
-from tools.job_utils import capture_job_metadata, capture_run_metadata, derive_seed
+from tools.job_utils import capture_job_metadata, capture_run_metadata, derive_seed  # type: ignore
 
 from simulation_project_template import compute_mean, generate_random_numbers
 
-_log_path = snakemake.log[0]  # type: ignore[attr-defined]
+_log_path = snakemake.log[0]  # type: ignore
 logging.basicConfig(
     filename=_log_path,
     filemode="w",
@@ -24,18 +24,23 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
-cfg             = snakemake.params.cfg       # type: ignore[attr-defined]
-output_path     = snakemake.output.results   # type: ignore[attr-defined]
-wildcard_path   = snakemake.wildcards.path   # type: ignore[attr-defined]
-wildcard_instance = snakemake.wildcards.instance  # type: ignore[attr-defined]
+cfg = snakemake.params.cfg  # type: ignore
+output_path = snakemake.output.results  # type: ignore
+wildcard_path = snakemake.wildcards.path  # type: ignore
+wildcard_instance = snakemake.wildcards.instance  # type: ignore
 
-seed  = derive_seed(wildcard_path, wildcard_instance)
+seed = derive_seed(wildcard_path, wildcard_instance)
 count = int(cfg.get("count", 100))
-low   = float(cfg.get("low", 0.0))
-high  = float(cfg.get("high", 1.0))
+low = float(cfg.get("low", 0.0))
+high = float(cfg.get("high", 1.0))
 
-log.info("Starting simulation path=%s instance=%s count=%d seed=%d",
-         wildcard_path, wildcard_instance, count, seed)
+log.info(
+    "Starting simulation path=%s instance=%s count=%d seed=%d",
+    wildcard_path,
+    wildcard_instance,
+    count,
+    seed,
+)
 
 numbers_path = os.path.join(os.path.dirname(output_path), "numbers.json")
 generate_random_numbers(count, numbers_path, low=low, high=high, seed=seed)

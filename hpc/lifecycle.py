@@ -146,7 +146,7 @@ def _parse_workflow_refs(config_path: Path) -> set[str]:
 
 
 def collect_upload_paths(project_root: Path) -> list[str]:
-    required = {p.rstrip("/") for p in CORE_UPLOAD_PATHS}
+    required: set[str] = {p.rstrip("/") for p in CORE_UPLOAD_PATHS}
     cfg = project_root / "workflow.yaml"
     if cfg.exists():
         required.update(_parse_workflow_refs(cfg))

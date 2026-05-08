@@ -1,3 +1,6 @@
+# Template for hpc/config.yaml (gitignored).
+# Copy this file: cp hpc/config_example.yaml hpc/config.yaml
+
 executor: slurm
 latency-wait: 30
 software-deployment-method: apptainer

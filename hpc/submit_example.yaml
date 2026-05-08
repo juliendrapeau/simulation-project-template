@@ -1,6 +1,5 @@
 # Template for hpc/submit.yaml (gitignored).
 # Copy this file: cp hpc/submit_example.yaml hpc/submit.yaml
-# Then adjust resources for your experiment (time, mem, partition, etc.).
 
 resources:
   partition: c-main

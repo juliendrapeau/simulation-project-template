@@ -1,7 +1,7 @@
 [project]
 name = "simulation-project-template"
 description = "A template for reproducible simulation projects in Python."
-version = "0.1.0"
+version = "0.2.0"
 authors = [{ name = "Julien Drapeau", email = "juliendrapeau707@gmail.com" }]
 readme = "README.md"
 requires-python = ">=3.13"

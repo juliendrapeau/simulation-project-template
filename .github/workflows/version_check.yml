@@ -1,0 +1,55 @@
+name: Version check
+
+on:
+  pull_request:
+    branches: [main, dev]
+    paths:
+      - "pyproject.toml"
+
+permissions:
+  contents: read
+
+jobs:
+  version-check:
+    name: Verify version bump
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Read version from pyproject.toml
+        id: version
+        run: |
+          VERSION=$(python3 -c "
+          import tomllib; from pathlib import Path
+          d = tomllib.loads(Path('pyproject.toml').read_text())
+          print(d['project']['version'])
+          ")
+          echo "value=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Check tag does not already exist
+        run: |
+          TAG="v${{ steps.version.outputs.value }}"
+          if git ls-remote --tags origin | grep -q "refs/tags/${TAG}$"; then
+            echo "::error::Tag ${TAG} already exists. Bump the version in pyproject.toml before merging."
+            exit 1
+          fi
+          echo "Tag ${TAG} is free — ok to merge."
+
+      - name: Verify version changed from base branch
+        run: |
+          BASE_VERSION=$(git show "origin/${{ github.base_ref }}:pyproject.toml" \
+            | python3 -c "
+          import tomllib, sys
+          d = tomllib.loads(sys.stdin.read())
+          print(d['project']['version'])
+          ")
+          PR_VERSION="${{ steps.version.outputs.value }}"
+          if [ "$BASE_VERSION" = "$PR_VERSION" ]; then
+            echo "::error::Version is still ${PR_VERSION} (same as base branch). Bump the version in pyproject.toml."
+            exit 1
+          fi
+          echo "Version bumped: ${BASE_VERSION} → ${PR_VERSION}"

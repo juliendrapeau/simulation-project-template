@@ -1,3 +1,6 @@
+# Template for workflow.yaml (gitignored).
+# Copy this file: cp workflow_example.yaml workflow.yaml
+#
 active:
   stage: simulation
   steps: [simulate, aggregate]

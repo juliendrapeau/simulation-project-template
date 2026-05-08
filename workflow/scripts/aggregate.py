@@ -12,8 +12,8 @@ from pathlib import Path
 
 import pandas as pd
 
-result_files: list[str] = list(snakemake.input.results)  # type: ignore[attr-defined]
-output_csv: str = snakemake.output.results                # type: ignore[attr-defined]
+result_files: list[str] = list(snakemake.input.results)  # type: ignore
+output_csv: str = snakemake.output.results  # type: ignore
 
 rows = []
 for path in result_files:
@@ -21,11 +21,11 @@ for path in result_files:
         data = json.load(f)
     row: dict = {}
     row.update({k: v for k, v in data.get("params", {}).items() if k != "short_path"})
-    row["path"]     = data.get("path")
+    row["path"] = data.get("path")
     row["instance"] = data.get("instance")
-    row["seed"]     = data.get("seed")
-    row["count"]    = data.get("count")
-    row["mean"]     = data.get("mean")
+    row["seed"] = data.get("seed")
+    row["count"] = data.get("count")
+    row["mean"] = data.get("mean")
     rows.append(row)
 
 df = pd.DataFrame(rows)

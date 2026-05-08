@@ -27,18 +27,18 @@ PLATFORM_ARCH: dict[str, str] = {
 APPTAINER_IMAGE = "kaczmarj/apptainer:latest"
 
 
-def _check_clean_src() -> None:
+def _check_clean_tree() -> None:
     root = Path(__file__).resolve().parent.parent.parent
     result = subprocess.run(
-        ["git", "status", "--porcelain", "src/"],
+        ["git", "status", "--porcelain"],
         capture_output=True,
         text=True,
         cwd=root,
     )
     if result.stdout.strip():
         print(
-            "error: uncommitted changes in src/ would be baked into the image.\n"
-            "Commit or stash them before building the SIF.\n\n" + result.stdout,
+            "error: uncommitted changes would be baked into the image.\n"
+            "Commit or stash all changes before building the SIF.\n\n" + result.stdout,
             file=sys.stderr,
         )
         raise SystemExit(1)
@@ -129,11 +129,11 @@ def main() -> int:
     parser.add_argument(
         "--dirty",
         action="store_true",
-        help="Allow building with uncommitted changes in src/. For testing only.",
+        help="Allow building with uncommitted changes. For testing only.",
     )
     args = parser.parse_args()
     if not args.dirty:
-        _check_clean_src()
+        _check_clean_tree()
     suffix = args.suffix.strip("-")
     dockerfile = _project_root() / (f"Dockerfile-{suffix}" if suffix else "Dockerfile")
 

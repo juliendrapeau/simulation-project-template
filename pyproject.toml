@@ -1,7 +1,7 @@
 [project]
 name = "simulation-project-template"
 description = "A template for reproducible simulation projects in Python."
-version = "0.1.0"
+version = "0.2.0"
 authors = [{ name = "Julien Drapeau", email = "juliendrapeau707@gmail.com" }]
 readme = "README.md"
 requires-python = ">=3.13"
@@ -18,21 +18,17 @@ build-backend = "uv_build"
 dev = [
   "importlib-metadata>=9.0.0",
   "matplotlib>=3.10.8",
-  "mypy>=1.19.1,<2.0",
   "pytest>=9.0.2",
   "pytest-cov>=7.0.0",
   "pytest-timeout>=2.4.0",
   "pytest-xdist>=3.8.0",
   "pyyaml>=6.0",
-  "types-pyyaml>=6.0",
   "ruff>=0.15.5",
   "seaborn>=0.13.2",
   "snakemake>=9.13.4",
   "tqdm>=4.0",
+  "ty>=0.0.34",
 ]
-
-[tool.mypy]
-ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 addopts = "--cov=src --cov-report=term-missing --cov-report=html"

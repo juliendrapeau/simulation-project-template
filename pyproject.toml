@@ -5,7 +5,7 @@ version = "0.2.1"
 authors = [{ name = "Julien Drapeau", email = "juliendrapeau707@gmail.com" }]
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = ["numpy>=2.3.4", "pandas>=2.3.3"]
+dependencies = ["click>=8.0", "numpy>=2.3.4", "pandas>=2.3.3"]
 
 [project.scripts]
 spt = "simulation_project_template.cli:main"
@@ -29,6 +29,9 @@ dev = [
   "tqdm>=4.0",
   "ty>=0.0.34",
 ]
+
+[tool.ty.rules]
+unresolved-import = "ignore"
 
 [tool.pytest.ini_options]
 addopts = "--cov=src --cov-report=term-missing --cov-report=html"

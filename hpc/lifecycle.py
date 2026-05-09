@@ -1,7 +1,7 @@
 """HPC lifecycle manager for cluster upload/setup/submit/check/download/status.
 
 Usage:
-  python hpc/lifecycle.py upload   <cluster> <remote_folder> [--dry-run] [--no-build-sif]
+  python hpc/lifecycle.py upload   <cluster> <remote_folder> [--dry-run] [--build-sif]
   python hpc/lifecycle.py setup    <cluster> <remote_folder> [--salloc] [--dry-run]
   python hpc/lifecycle.py submit   <cluster> <remote_folder> [--mode profile|local] [--dry-run]
   python hpc/lifecycle.py download <cluster> <remote_folder> [--paths results] [--dry-run]
@@ -173,7 +173,9 @@ def _add_upload_parser(sub: argparse._SubParsersAction) -> None:
     )
     p.add_argument("--remote-root", default=None)
     p.add_argument("--dry-run", action="store_true")
-    p.add_argument("--no-build-sif", action="store_true", help="Skip SIF image build.")
+    p.add_argument(
+        "--build-sif", action="store_true", help="Build SIF image before upload."
+    )
     p.add_argument("--sif-platform", default="linux/amd64")
     p.add_argument("--sif-suffix", default="")
     p.set_defaults(func=cmd_upload)
@@ -184,7 +186,7 @@ def cmd_upload(args: argparse.Namespace) -> int:
     if not project_root.exists():
         raise FileNotFoundError(f"Project root not found: {project_root}")
 
-    if not args.no_build_sif:
+    if args.build_sif:
         sif_cmd = [
             "uv",
             "run",

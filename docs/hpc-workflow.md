@@ -84,10 +84,10 @@ Or pass `--remote-root /path/to/root` on every command.
 ## Running an experiment
 
 ```bash
-# Submit (profile mode: one SLURM job per rule instance).
+# Submit (profile mode: one SLURM job per rule instance -> good for long jobs).
 python hpc/lifecycle.py submit mycluster myproject/workflow
 
-# Single job using all allocated CPUs (no per-rule SLURM jobs).
+# Submit (local mode: single job using all allocated CPUs -> good for quick jobs)
 python hpc/lifecycle.py submit mycluster myproject/workflow --mode local
 
 # Plan only — show what Snakemake would run without submitting.

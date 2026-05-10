@@ -297,11 +297,14 @@ modules.xml
 
 # Claude
 .claude/
+PR.md
+CLAUDE.md
 
 # Project-specific
 hpc/config.yaml
 hpc/submit.yaml
 workflow.yaml
+bin
 
 # Generated data and results (large, reproducible from workflow)
 data/

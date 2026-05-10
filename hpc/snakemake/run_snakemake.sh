@@ -18,6 +18,12 @@ module load scipy-stack/2026a
 
 source "$ENV"/bin/activate
 
+# Bind the project root into every Apptainer container so that relative
+# output paths (data/, results/) resolve to the writable host filesystem
+# instead of the container's read-only image layer.
+export APPTAINER_BIND="${PWD}:${PWD}"
+export SINGULARITY_BIND="${PWD}:${PWD}" # compatibility alias for older installations
+
 case "$MODE" in
 profile)
   # Distribute jobs across the cluster via the SLURM profile.

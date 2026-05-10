@@ -44,6 +44,17 @@ simulation-project-template/
 └── workflow.yaml               # active stage, steps, CSV path, num_instances
 ```
 
+## Architecture
+
+<details>
+<summary><strong>Show architecture diagram</strong></summary>
+
+![Architecture](/docs/architecture.png)
+
+</details>
+
+See [`docs/architecture.md`](docs/architecture.md).
+
 ## Installation
 
 Requires Python 3.13+ and [uv](https://docs.astral.sh/uv/getting-started/installation/).

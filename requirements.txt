@@ -59,7 +59,6 @@ idna==3.11
     # via requests
 immutables==0.21
     # via snakemake
-importlib-metadata==9.0.0
 iniconfig==2.3.0
     # via pytest
 jinja2==3.1.6
@@ -200,5 +199,3 @@ wrapt==2.0.0
     #   snakemake-interface-storage-plugins
 yte==1.9.0
     # via snakemake
-zipp==3.23.1
-    # via importlib-metadata

@@ -22,8 +22,17 @@ if not Path(CSV).exists():
 
 _df = pd.read_csv(CSV)
 
+
+def _clean(v):
+    """Return None for NaN (empty CSV cells); pass everything else through."""
+    try:
+        return None if pd.isna(v) else v
+    except (TypeError, ValueError):
+        return v
+
+
 params_by_path = {
-    row["short_path"]: row.to_dict()
+    row["short_path"]: {k: _clean(v) for k, v in row.to_dict().items()}
     for _, row in _df.iterrows()
 }
 

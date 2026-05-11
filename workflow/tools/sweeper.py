@@ -41,7 +41,6 @@ import datetime
 import hashlib
 import itertools
 import json
-import random
 import re
 import socket
 import subprocess
@@ -110,7 +109,9 @@ class Config:
     metadata : dict, optional
         Extra key-value pairs merged into the auto-generated metadata.
     seed : int, optional
-        RNG seed.  If ``None``, a random 32-bit integer is chosen.
+        RNG seed.  If ``None``, a random 32-bit integer is chosen and stored
+        in ``metadata["seed"]``.  Downstream code needing reproducibility
+        should call ``np.random.default_rng(seed)`` with the stored seed.
     """
 
     def __init__(
@@ -220,10 +221,27 @@ class Config:
 
     @staticmethod
     def default_metadata(seed: Optional[int] = None) -> Dict[str, Any]:
+        """Generate default reproducibility metadata.
+
+        Parameters
+        ----------
+        seed : int, optional
+            RNG seed.  If ``None``, a random 32-bit integer is chosen via
+            ``np.random.default_rng()`` and stored in the returned dict.
+            Callers needing a reproducible generator should pass the stored
+            seed to ``np.random.default_rng(metadata["seed"])``.
+
+        Returns
+        -------
+        dict with keys:
+            - ``"timestamp"`` — ISO-8601 creation time (second precision).
+            - ``"host"`` — hostname of the machine that generated the config.
+            - ``"git_commit"`` — current HEAD SHA, or ``"unknown"``.
+            - ``"seed"`` — the (possibly auto-chosen) integer seed.
+            - ``"tags"`` — empty list, reserved for user-defined labels.
+        """
         if seed is None:
-            seed = random.randint(0, 2**32 - 1)
-        random.seed(seed)
-        np.random.seed(seed)
+            seed = int(np.random.default_rng().integers(2**32))
         try:
             commit = (
                 subprocess.check_output(
@@ -258,7 +276,9 @@ class Config:
             params=_deep_merge(self.params, other.params),
             metadata={**self.metadata, **other.metadata},
         )
-        merged.short_path = other.short_path if other.short_path is not None else self.short_path
+        merged.short_path = (
+            other.short_path if other.short_path is not None else self.short_path
+        )
         return merged
 
 
@@ -417,7 +437,9 @@ class ConfigSet:
         """Expand a list of parameter grids and combine the results."""
         combined: List[Config] = []
         for grid in param_grids:
-            partial = cls.expand_from_grid(grid, constraint=constraint, metadata=metadata)
+            partial = cls.expand_from_grid(
+                grid, constraint=constraint, metadata=metadata
+            )
             combined.extend(partial.configs)
         return cls(combined)
 
@@ -480,9 +502,13 @@ class ConfigSet:
 
         expand_meta = {"tags": tags or []}
         if isinstance(param_grid, list):
-            cfgset = cls.expand_from_grids(param_grid, constraint=constraint, metadata=expand_meta)
+            cfgset = cls.expand_from_grids(
+                param_grid, constraint=constraint, metadata=expand_meta
+            )
         else:
-            cfgset = cls.expand_from_grid(param_grid, constraint=constraint, metadata=expand_meta)
+            cfgset = cls.expand_from_grid(
+                param_grid, constraint=constraint, metadata=expand_meta
+            )
 
         cfgset.slugify_all(
             root=str(exp_dir),
